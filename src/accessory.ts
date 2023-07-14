@@ -102,8 +102,10 @@ export class DenonMarantzAVRAccessory {
             );
         speakerService.getCharacteristic(this.platform.Characteristic.Mute).onGet(this.getMute.bind(this)).onSet(this.setMute.bind(this))
 
+        speakerService.getCharacteristic(this.platform.Characteristic.Volume).onGet(this.getVolume.bind(this)).onSet(this.setVolume.bind(this))
+
         // handle volume control
-        speakerService.getCharacteristic(this.platform.Characteristic.VolumeSelector).onGet(this.getVolume.bind(this)).onSet(this.setVolume.bind(this));
+        speakerService.getCharacteristic(this.platform.Characteristic.VolumeSelector).onSet(this.setVolumeSelector.bind(this));
 
         return;
     }
@@ -252,13 +254,12 @@ export class DenonMarantzAVRAccessory {
         await this.controller.SetMuteSate(this.zone, state as boolean);
     }
     
-    async setVolume(direction: CharacteristicValue) {
+    async setVolumeSelector(direction: CharacteristicValue) {
         try {
             const currentVolume = Number(this.controller.GetVolume(this.zone));
             const volumeStep = 5;
 
-
-            if (direction === 0) {
+            if (direction === this.platform.Characteristic.VolumeSelector.INCREMENT) {
                 this.platform.log.info('Volume Up', currentVolume + volumeStep);
                 await this.controller.SetVolume(this.zone, currentVolume + volumeStep)
             } else {
@@ -269,6 +270,10 @@ export class DenonMarantzAVRAccessory {
         } catch (error) {
             this.platform.log.error((error as Error).message);
         }
+    }
+
+    async setVolume(value: CharacteristicValue) {
+        await this.controller.SetVolume(this.zone, value as number)
     }
 
     async getVolume(): Promise<CharacteristicValue> {
