@@ -136,51 +136,51 @@ export class DenonMarantzAVRAccessory {
                     );
 
                 // Update input name cache
-                inputService
-                    .getCharacteristic(this.platform.Characteristic.ConfiguredName)
-                    .onGet(async (): Promise<CharacteristicValue> => {
-                        return input;
-                    })
-                    .onSet((name: CharacteristicValue) => {
-                        const currentConfiguredName = inputService.getCharacteristic(
-                            this.platform.Characteristic.ConfiguredName,
-                        ).value;
+                // inputService
+                //     .getCharacteristic(this.platform.Characteristic.ConfiguredName)
+                //     .onGet(async (): Promise<CharacteristicValue> => {
+                //         return input;
+                //     })
+                //     .onSet((name: CharacteristicValue) => {
+                //         const currentConfiguredName = inputService.getCharacteristic(
+                //             this.platform.Characteristic.ConfiguredName,
+                //         ).value;
 
-                        if (name === currentConfiguredName) {
-                            return;
-                        }
+                //         if (name === currentConfiguredName) {
+                //             return;
+                //         }
 
-                        this.platform.log.debug(`Set input (${input}) name to ${name} `);
+                //         this.platform.log.debug(`Set input (${input}) name to ${name} `);
 
-                        const configuredName = name || input;
+                //         const configuredName = name || input;
 
-                        inputService.updateCharacteristic(this.platform.Characteristic.ConfiguredName, configuredName);
-                    });
+                //         inputService.updateCharacteristic(this.platform.Characteristic.ConfiguredName, configuredName);
+                //     });
 
                 // Update input visibility cache
-                inputService
-                    .getCharacteristic(this.platform.Characteristic.TargetVisibilityState)
-                    .onGet(async (): Promise<CharacteristicValue> => {
-                        return 0;
-                    })
-                    .onSet((targetVisibilityState: CharacteristicValue) => {
-                        const currentVisbility = inputService.getCharacteristic(
-                            this.platform.Characteristic.CurrentVisibilityState,
-                        ).value;
+                // inputService
+                //     .getCharacteristic(this.platform.Characteristic.TargetVisibilityState)
+                //     .onGet(async (): Promise<CharacteristicValue> => {
+                //         return 0;
+                //     })
+                //     .onSet((targetVisibilityState: CharacteristicValue) => {
+                //         const currentVisbility = inputService.getCharacteristic(
+                //             this.platform.Characteristic.CurrentVisibilityState,
+                //         ).value;
 
-                        if (targetVisibilityState === currentVisbility) {
-                            return;
-                        }
+                //         if (targetVisibilityState === currentVisbility) {
+                //             return;
+                //         }
 
-                        const isHidden = targetVisibilityState === this.platform.Characteristic.TargetVisibilityState.HIDDEN;
+                //         const isHidden = targetVisibilityState === this.platform.Characteristic.TargetVisibilityState.HIDDEN;
 
-                        this.platform.log.debug(`Set input (${input}) visibility state to ${isHidden ? 'HIDDEN' : 'SHOWN'} `);
+                //         this.platform.log.debug(`Set input (${input}) visibility state to ${isHidden ? 'HIDDEN' : 'SHOWN'} `);
 
-                        inputService.updateCharacteristic(
-                            this.platform.Characteristic.CurrentVisibilityState,
-                            targetVisibilityState,
-                        );
-                    });
+                //         inputService.updateCharacteristic(
+                //             this.platform.Characteristic.CurrentVisibilityState,
+                //             targetVisibilityState,
+                //         );
+                //     });
 
                 inputService.getCharacteristic(this.platform.Characteristic.Name).onGet((): CharacteristicValue => input);
 

@@ -74,11 +74,9 @@ export class DenonMarantzController {
     }
 
     async refresh() {
-        this.log.info("starting refresh")
         Object.keys(this.COMMANDS).forEach((cmd: string) => {
             // for status add question mark
-            this.log.info(cmd)
-            this.serverControllerSend(`${cmd}?`)
+             this.serverControllerSend(`${cmd}?`)
         })
 
         this.log.info("current state of controller ", this.state)
@@ -91,9 +89,7 @@ export class DenonMarantzController {
 
     async serverControllerSend(data: string) {
         // msleep(50);
-        this.log.info("sending ", data);
         let result = await this.serverController.exec(data);
-        this.log.info("got", result)
         this.parseCommandResult(result)
     }
 
@@ -114,6 +110,7 @@ export class DenonMarantzController {
         }
 
         let value = Number(data)
+        this.log.info("new value", value, data)
         if (data.length > 2) {
             // multipled by 10 to not be float (example: 505 == 50.5)
             value = value / 10
@@ -163,13 +160,12 @@ export class DenonMarantzController {
     private parseCommandResult(data: string) {
         this.log.info(`parsing result ${data}`)
         let results = data.split('\r');
-        this.log.info("split results", results)
         results.forEach((result) => {
             Object.keys(this.COMMANDS).forEach((cmd) => {
                 if (result.startsWith(cmd)) {
                     if (this.COMMANDS[cmd][1] != null) {
                         this.COMMANDS[cmd][1](result)
-                    } else if (result.length !== 0) {
+                    } else {
                         this.log.info("split by cmd ", result, cmd, result.split(cmd))
                         this.parseMany(cmd, result.split(cmd)[1].trim())
                     }
