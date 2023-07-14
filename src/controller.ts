@@ -63,7 +63,7 @@ export class DenonMarantzController {
             ors: '\r\n',
             separator: false,
             shellPrompt: '',
-            timeout: 800,
+            timeout: 1500,
         }
 
         await this.serverController.connect(params);
@@ -156,15 +156,15 @@ export class DenonMarantzController {
     private parseCommandResult(data: string) {
         this.log.info(`parsing result ${data}`)
         let results = data.split('\r');
-        for (const result in results) {
-            for (const cmd in Object.keys(this.COMMANDS)) {
+        results.forEach((result) => {
+            Object.keys(this.COMMANDS).forEach((cmd) =>{
                 if (result.startsWith(cmd) && this.COMMANDS[cmd][1] != null) {
                     this.COMMANDS[cmd][1](result)
                 } else {
                     this.parseMany(cmd, result.split(cmd)[1].trim())
                 }
-            }
-        }
+            })
+        })
     }
 
 
