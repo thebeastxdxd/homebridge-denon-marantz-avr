@@ -113,11 +113,11 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
         const existingAccessory = this.platformAccessories.find(accessory => accessory.UUID === uuid)
 
         if (existingAccessory) {
-            this.log(`restoring from cache ${device.displayName}, with ip ${device.ip}`)
+            this.log.info(`restoring from cache ${device.displayName}, with ip ${device.ip}`)
             new DenonMarantzAVRAccessory(this.log, this, existingAccessory, zone, controller);
         } else {
 
-            this.log(`adding accessory ${device.displayName}, with ip ${device.ip}`)
+            this.log.info(`adding accessory ${device.displayName}, with ip ${device.ip}`)
 
             const accessory = new this.api.platformAccessory(
                 `${device.displayName} ${zone}`,
