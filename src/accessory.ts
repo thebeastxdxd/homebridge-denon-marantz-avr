@@ -114,7 +114,7 @@ export class DenonMarantzAVRAccessory {
         this.state.inputs.forEach(async (input, i) => {
             try {
                 this.log.info(`adding television input service with name ${input} `)
-                const inputService = this.accessory.addService(this.platform.Service.InputSource, input, input);
+                const inputService = this.accessory.getServiceById(this.platform.Service.InputSource.UUID, input) || this.accessory.addService(this.platform.Service.InputSource, input, input);
 
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
@@ -136,55 +136,6 @@ export class DenonMarantzAVRAccessory {
                         this.platform.Characteristic.InputDeviceType,
                         this.platform.Characteristic.InputDeviceType.TV,
                     );
-
-                // Update input name cache
-                // inputService
-                //     .getCharacteristic(this.platform.Characteristic.ConfiguredName)
-                //     .onGet(async (): Promise<CharacteristicValue> => {
-                //         return input;
-                //     })
-                //     .onSet((name: CharacteristicValue) => {
-                //         const currentConfiguredName = inputService.getCharacteristic(
-                //             this.platform.Characteristic.ConfiguredName,
-                //         ).value;
-
-                //         if (name === currentConfiguredName) {
-                //             return;
-                //         }
-
-                //         this.platform.log.debug(`Set input (${input}) name to ${name} `);
-
-                //         const configuredName = name || input;
-
-                //         inputService.updateCharacteristic(this.platform.Characteristic.ConfiguredName, configuredName);
-                //     });
-
-                // Update input visibility cache
-                // inputService
-                //     .getCharacteristic(this.platform.Characteristic.TargetVisibilityState)
-                //     .onGet(async (): Promise<CharacteristicValue> => {
-                //         return 0;
-                //     })
-                //     .onSet((targetVisibilityState: CharacteristicValue) => {
-                //         const currentVisbility = inputService.getCharacteristic(
-                //             this.platform.Characteristic.CurrentVisibilityState,
-                //         ).value;
-
-                //         if (targetVisibilityState === currentVisbility) {
-                //             return;
-                //         }
-
-                //         const isHidden = targetVisibilityState === this.platform.Characteristic.TargetVisibilityState.HIDDEN;
-
-                //         this.platform.log.debug(`Set input (${input}) visibility state to ${isHidden ? 'HIDDEN' : 'SHOWN'} `);
-
-                //         inputService.updateCharacteristic(
-                //             this.platform.Characteristic.CurrentVisibilityState,
-                //             targetVisibilityState,
-                //         );
-                //     });
-
-                // inputService.getCharacteristic(this.platform.Characteristic.Name).onGet((): CharacteristicValue => input);
 
 
                 this.service.addLinkedService(inputService);
