@@ -11,7 +11,6 @@ export class DenonMarantzController {
     private serverController: telnet_client;
     private readonly log: Logging;
     public readonly ipaddress: string;
-    private quedCommands: [string, ((value: string) => void)][];
     private maxVol: Number;
     private state: { [key: string]: any };
     private COMMANDS: { [key: string]: any } = {
@@ -44,7 +43,6 @@ export class DenonMarantzController {
     ) {
         this.log = log;
         this.ipaddress = ipaddress;
-        this.quedCommands = [];
         this.maxVol = 98.0 // good default
         this.serverController = new telnet_client();
         this.log.info("Connecting to Denon/Marantz Controller at ", ipaddress);
@@ -53,8 +51,6 @@ export class DenonMarantzController {
         for (const command of Object.keys(this.COMMANDS)) {
             this.state[command] = '-';
         }
-
-        setTimeout(this.runQuededCommands.bind(this), 50);
     }
 
     async serverControllerConnect() {
@@ -79,7 +75,7 @@ export class DenonMarantzController {
         this.log.info("starting refresh")
         for (const cmd in this.COMMANDS) {
             // for status add question mark
-            this.serverControllerQueueCommand(`${cmd}?`)
+            this.serverControllerSend(`${cmd}?`)
         }
 
         this.log.info("current state of controller ", this.state)
@@ -90,27 +86,10 @@ export class DenonMarantzController {
         this.parseCommandResult(data.toString())
     }
 
-    async serverControllerQueueCommand(data: string): Promise<string> {
-        return new Promise((resolve) => {
-            this.quedCommands.push([data, resolve]);
-        });
+    async serverControllerSend(data: string) {
+        this.serverController.send(data);
     }
 
-    async runQuededCommands() {
-        if (this.quedCommands.length !== 0) {
-            const result = await this.serverController.exec(this.quedCommands[0][0]);
-            this.log.debug(`command ${this.quedCommands[0][0]}, result ${result}`);
-
-            this.quedCommands[0][1](result);
-
-            this.quedCommands.shift();
-        }
-        if (this.quedCommands.length !== 0) {
-            setTimeout(this.runQuededCommands.bind(this), 0);
-        } else {
-            setTimeout(this.runQuededCommands.bind(this), 50);
-        }
-    }
 
     private parseMany(cmd: string, data: string) {
         this.log.info(`ParseMany ${cmd} with ${data}`)
@@ -239,7 +218,7 @@ export class DenonMarantzController {
             prefix = 'PW';
             state = value ? 'ON' : 'STANDBY'
         }
-        await this.serverControllerQueueCommand(`${prefix}${state}`)
+        await this.serverControllerSend(`${prefix}${state}`)
     }
 
     GetMuteState(zone: string): Boolean {
@@ -249,7 +228,7 @@ export class DenonMarantzController {
 
     async SetMuteSate(zone: string, value: boolean) {
         let commandPrefix = `${this.getPrefixByZone(zone)}MU`
-        await this.serverControllerQueueCommand(`${commandPrefix}${this.boolToString(value)}`);
+        await this.serverControllerSend(`${commandPrefix}${this.boolToString(value)}`);
     }
 
     GetVolume(zone: string): Number {
@@ -268,7 +247,7 @@ export class DenonMarantzController {
             value = 5* Math.round(Number(value) * 10 / 5)
         }
         let commandPrefix = `${this.getPrefixByZone(zone)}MV${value}\r${this.getPrefixByZone(zone)}MVMAX ${this.maxVol}`;
-        await this.serverControllerQueueCommand(commandPrefix)
+        await this.serverControllerSend(commandPrefix)
     }
 
     GetInputSource(zone: string): string {
@@ -278,6 +257,6 @@ export class DenonMarantzController {
 
     async SetInputSource(zone: string, source: string) {
         let command = `${this.getPrefixByZone(zone)}${source}`;
-        await this.serverControllerQueueCommand(command)
+        await this.serverControllerSend(command)
     }
 }
