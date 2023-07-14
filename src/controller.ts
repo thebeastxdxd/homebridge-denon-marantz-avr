@@ -156,12 +156,14 @@ export class DenonMarantzController {
     private parseCommandResult(data: string) {
         this.log.info(`parsing result ${data}`)
         let results = data.split('\r');
+        this.log.info("split results", results)
         results.forEach((result) => {
             Object.keys(this.COMMANDS).forEach((cmd) =>{
                 this.log.info("result", result)
                 if (result.startsWith(cmd) && this.COMMANDS[cmd][1] != null) {
                     this.COMMANDS[cmd][1](result)
                 } else if (result.length !== 0) {
+                    this.log.info("split by cmd ", result, cmd, result.split(cmd))
                     this.parseMany(cmd, result.split(cmd)[1].trim())
                 }
             })
