@@ -62,7 +62,7 @@ export class DenonMarantzController {
             echoLines: 0,
             irs: '\r',
             negotiationMandatory: false,
-            ors: '\r\n',
+            ors: '\r',
             separator: false,
             shellPrompt: '',
             timeout: 1500,
@@ -90,8 +90,11 @@ export class DenonMarantzController {
     }
 
     async serverControllerSend(data: string) {
-        msleep(50);
-        this.serverController.send(`${data}\r`);
+        // msleep(50);
+        this.log.info("sending ", data);
+        let result = await this.serverController.exec(data);
+        this.log.info("got", result)
+        this.parseCommandResult(result)
     }
 
 
