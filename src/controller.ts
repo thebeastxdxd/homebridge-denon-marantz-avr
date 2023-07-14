@@ -18,12 +18,12 @@ export class DenonMarantzController {
     private COMMANDS: { [key: string]: any } = {
         "PW": ["Power", null],
         "ZM": ["Main Zone", null],
-        "Z2": ["Zone 2", this.parseZ2], // will handle Z2MV, Z2SI
-        "Z3": ["Zone 3", this.parseZ3], // will handle Z3MV, Z3SI
+        "Z2": ["Zone 2", (data: string) => this.parseZ2(data)], // will handle Z2MV, Z2SI
+        "Z3": ["Zone 3", (data: string) => this.parseZ3(data)], // will handle Z3MV, Z3SI
         "MU": ["Muted", null],
         "Z2MU": ["Z2 Muted", null],
         "Z3MU": ["Z3 Muted", null],
-        "MV": ["Volume", this.parseMV],
+        "MV": ["Volume", (data: string) => this.parseMV(data)],
         "Z2MV": ["Z2 Volume", null],
         "Z3MV": ["Z3 Volume", null],
         "SI": ["Source", null],
