@@ -158,9 +158,10 @@ export class DenonMarantzController {
         let results = data.split('\r');
         results.forEach((result) => {
             Object.keys(this.COMMANDS).forEach((cmd) =>{
+                this.log.info("result", result)
                 if (result.startsWith(cmd) && this.COMMANDS[cmd][1] != null) {
                     this.COMMANDS[cmd][1](result)
-                } else {
+                } else if (result.length !== 0) {
                     this.parseMany(cmd, result.split(cmd)[1].trim())
                 }
             })
