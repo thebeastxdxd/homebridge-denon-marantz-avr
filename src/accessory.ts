@@ -66,6 +66,7 @@ export class DenonMarantzAVRAccessory {
         // Set Television Service Name & Discovery Mode
         this.log.info("display name is ", this.accessory.context.device.display)
         this.service
+            .setCharacteristic(this.platform.Characteristic.Name, this.accessory.context.device.displayName)
             .setCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessory.context.device.displayName)
             .setCharacteristic(
                 this.platform.Characteristic.SleepDiscoveryMode,
@@ -120,7 +121,7 @@ export class DenonMarantzAVRAccessory {
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
                     .setCharacteristic(this.platform.Characteristic.Name, input)
-                    .setCharacteristic(this.platform.Characteristic.ConfiguredName, input)
+                    // .setCharacteristic(this.platform.Characteristic.ConfiguredName, input)
                     .setCharacteristic(
                         this.platform.Characteristic.IsConfigured,
                         this.platform.Characteristic.IsConfigured.CONFIGURED,
