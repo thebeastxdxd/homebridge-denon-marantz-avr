@@ -107,7 +107,7 @@ export class DenonMarantzController {
         let value = "";
         if (data.startsWith('MVMAX')) {
             isMax = true;
-            value = data.split('MVMAX')[1]
+            value = data.split('MVMAX')[1].trim()
         } else {
             value = data.split('MV')[1]
         }
@@ -117,7 +117,7 @@ export class DenonMarantzController {
             // multipled by 10 to not be float (example: 505 == 50.5)
             volume = volume / 10
         }
-        this.log.info("new value", volume, value, value.length > 2)
+        this.log.info("new value", volume, value, value.length)
 
         if (isMax) {
             this.maxVol = volume;

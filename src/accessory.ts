@@ -64,6 +64,7 @@ export class DenonMarantzAVRAccessory {
 
     async createTVService() {
         // Set Television Service Name & Discovery Mode
+        this.log.info("display name is ", this.accessory.context.device.display)
         this.service
             .setCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessory.context.device.displayName)
             .setCharacteristic(
@@ -114,7 +115,7 @@ export class DenonMarantzAVRAccessory {
         this.state.inputs.forEach(async (input, i) => {
             try {
                 this.log.info(`adding television input service with name ${input} `)
-                const inputService = this.accessory.getServiceById(this.platform.Service.InputSource.UUID, input) || this.accessory.addService(this.platform.Service.InputSource, input, input);
+                const inputService = this.accessory.getServiceById(this.platform.Service.InputSource, input) || this.accessory.addService(this.platform.Service.InputSource, input, input);
 
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
