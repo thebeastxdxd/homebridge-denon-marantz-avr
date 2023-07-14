@@ -81,6 +81,8 @@ export class DenonMarantzController {
             await this.serverControllerQueueCommand(`${cmd}?`)
         }
 
+        this.log("current state of controller ", this.state)
+
     }
 
     private serverControllerDataCallback(data: Buffer) {
@@ -268,12 +270,12 @@ export class DenonMarantzController {
         await this.serverControllerQueueCommand(commandPrefix)
     }
 
-    GetSource(zone: string): string {
+    GetInputSource(zone: string): string {
         let commandPrefix = `${this.getPrefixByZone(zone)}SI`;
         return this.state[commandPrefix];
     }
 
-    async SetSource(zone: string, source: string) {
+    async SetInputSource(zone: string, source: string) {
         let command = `${this.getPrefixByZone(zone)}${source}`;
         await this.serverControllerQueueCommand(command)
     }

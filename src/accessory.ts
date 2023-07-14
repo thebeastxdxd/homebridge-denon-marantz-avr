@@ -207,7 +207,7 @@ export class DenonMarantzAVRAccessory {
 
             await this.controller.refresh();
             let power = this.controller.GetPowerState(this.zone);
-            let source = this.controller.GetSource(this.zone);
+            let source = this.controller.GetInputSource(this.zone);
             this.platform.log.debug(`AVR PING`, { power: power, input: source});
 
             this.service.updateCharacteristic(this.platform.Characteristic.Active, power as CharacteristicValue);
@@ -235,7 +235,7 @@ export class DenonMarantzAVRAccessory {
     }
 
     async getPowerState(): Promise<CharacteristicValue> {
-        this.log.info(`Get controller state ${this.controller.ipaddress} zone ${this.zone} `)
+        this.log.info(`Get power state ${this.controller.ipaddress} zone ${this.zone} power ${this.controller.GetPowerState(this.zone)} `)
         return this.controller.GetPowerState(this.zone) as CharacteristicValue;
     }
 
@@ -244,114 +244,14 @@ export class DenonMarantzAVRAccessory {
     }
 
     async getMute(): Promise<CharacteristicValue> {
+        this.log.info(`Get mute state ${this.controller.GetMuteState(this.zone)} `)
         return this.controller.GetMuteState(this.zone) as CharacteristicValue;
     }
 
     async setMute(state: CharacteristicValue) {
         await this.controller.SetMuteSate(this.zone, state as boolean);
     }
-    // async setRemoteKey(remoteKey: CharacteristicValue) {
-    //     try {
-    //         const sendRemoteCode = async (remoteKey: MainZoneRemoteCode) => {
-    //             const sendIrCodeResponse = await fetch(`${this.baseApiUrl}/system/sendIrCode?code=${remoteKey}`);
-    //             const responseJson = (await sendIrCodeResponse.json()) as BaseResponse;
-
-    //             if (responseJson.response_code !== 0) {
-    //                 throw new Error('Failed to send ir code');
-    //             }
-    //         };
-
-    //         const controlCursor = async (cursor: Cursor) => {
-    //             const controlCursorResponse = await fetch(`${this.baseApiUrl}/${this.zone}/controlCursor?cursor=${cursor}`);
-    //             const responseJson = (await controlCursorResponse.json()) as BaseResponse;
-    //             if (responseJson.response_code !== 0) {
-    //                 throw new Error('Failed to control cursor');
-    //             }
-    //         };
-
-    //         switch (remoteKey) {
-    //             case this.platform.Characteristic.RemoteKey.REWIND:
-    //                 this.platform.log.info('set Remote Key Pressed: REWIND');
-    //                 sendRemoteCode(MainZoneRemoteCode.SEARCH_BACK);
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.FAST_FORWARD:
-    //                 this.platform.log.info('set Remote Key Pressed: FAST_FORWARD');
-    //                 sendRemoteCode(MainZoneRemoteCode.SEARCH_FWD);
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.NEXT_TRACK:
-    //                 this.platform.log.info('set Remote Key Pressed: NEXT_TRACK');
-    //                 sendRemoteCode(MainZoneRemoteCode.SKIP_FWD);
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.PREVIOUS_TRACK:
-    //                 this.platform.log.info('set Remote Key Pressed: PREVIOUS_TRACK');
-    //                 sendRemoteCode(MainZoneRemoteCode.SKIP_BACK);
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.ARROW_UP:
-    //                 this.platform.log.info('set Remote Key Pressed: ARROW_UP');
-    //                 controlCursor('up');
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.ARROW_DOWN:
-    //                 this.platform.log.info('set Remote Key Pressed: ARROW_DOWN');
-    //                 controlCursor('down');
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.ARROW_LEFT:
-    //                 this.platform.log.info('set Remote Key Pressed: ARROW_LEFT');
-    //                 controlCursor('left');
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.ARROW_RIGHT:
-    //                 this.platform.log.info('set Remote Key Pressed: ARROW_RIGHT');
-    //                 controlCursor('right');
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.SELECT:
-    //                 this.platform.log.info('set Remote Key Pressed: SELECT');
-    //                 controlCursor('select');
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.BACK:
-    //                 this.platform.log.info('set Remote Key Pressed: BACK');
-    //                 controlCursor('return');
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.EXIT:
-    //                 this.platform.log.info('set Remote Key Pressed: EXIT');
-    //                 sendRemoteCode(MainZoneRemoteCode.TOP_MENU);
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.PLAY_PAUSE:
-    //                 this.platform.log.info('set Remote Key Pressed: PLAY_PAUSE');
-    //                 if (this.state.isPlaying) {
-    //                     sendRemoteCode(MainZoneRemoteCode.PAUSE);
-    //                 } else {
-    //                     sendRemoteCode(MainZoneRemoteCode.PLAY);
-    //                 }
-
-    //                 this.state.isPlaying = !this.state.isPlaying;
-
-    //                 break;
-
-    //             case this.platform.Characteristic.RemoteKey.INFORMATION:
-    //                 this.platform.log.info('set Remote Key Pressed: INFORMATION');
-    //                 // We'll use the info button to flick through inputs
-    //                 sendRemoteCode(MainZoneRemoteCode.INPUT_FWD);
-    //                 break;
-
-    //             default:
-    //                 this.platform.log.info('unhandled Remote Key Pressed');
-    //                 break;
-    //         }
-    //     } catch (error) {
-    //         this.platform.log.error((error as Error).message);
-    //     }
-    // }
-
+    
     async setVolume(direction: CharacteristicValue) {
         try {
             const currentVolume = Number(this.controller.GetVolume(this.zone));
@@ -372,7 +272,8 @@ export class DenonMarantzAVRAccessory {
     }
 
     async getInputState(): Promise<CharacteristicValue> {
-        let source = this.controller.GetSource(this.zone);
+        this.log.info(`Get input state  ${this.controller.GetInputSource(this.zone)} `)
+        let source = this.controller.GetInputSource(this.zone);
         return this.state.inputs.findIndex((input) => input === source);
     }
 
@@ -382,7 +283,7 @@ export class DenonMarantzAVRAccessory {
                 return;
             }
 
-            const setInputResponse = await this.controller.SetSource(this.zone, this.state.inputs[inputIndex]);
+            const setInputResponse = await this.controller.SetInputSource(this.zone, this.state.inputs[inputIndex]);
 
             this.platform.log.info(`Set input: ${this.state.inputs[inputIndex]}`);
         } catch (error) {
