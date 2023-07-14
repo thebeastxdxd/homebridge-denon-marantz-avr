@@ -103,7 +103,7 @@ export class DenonMarantzAVRAccessory {
         speakerService.getCharacteristic(this.platform.Characteristic.Mute).onGet(this.getMute.bind(this)).onSet(this.setMute.bind(this))
 
         // handle volume control
-        speakerService.getCharacteristic(this.platform.Characteristic.VolumeSelector).onSet(this.setVolume.bind(this));
+        speakerService.getCharacteristic(this.platform.Characteristic.VolumeSelector).onGet(this.getVolume.bind(this)).onSet(this.setVolume.bind(this));
 
         return;
     }
@@ -112,7 +112,7 @@ export class DenonMarantzAVRAccessory {
         this.state.inputs.forEach(async (input, i) => {
             try {
                 this.log.info(`adding television input service with name ${input} `)
-                const inputService = this.accessory.getService(input) || this.accessory.addService(this.platform.Service.InputSource, input, i.toString());
+                const inputService = this.accessory.addService(this.platform.Service.InputSource, input, input);
 
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
@@ -182,7 +182,7 @@ export class DenonMarantzAVRAccessory {
                 //         );
                 //     });
 
-                inputService.getCharacteristic(this.platform.Characteristic.Name).onGet((): CharacteristicValue => input);
+                // inputService.getCharacteristic(this.platform.Characteristic.Name).onGet((): CharacteristicValue => input);
 
 
                 this.service.addLinkedService(inputService);
@@ -269,6 +269,10 @@ export class DenonMarantzAVRAccessory {
         } catch (error) {
             this.platform.log.error((error as Error).message);
         }
+    }
+
+    async getVolume(): Promise<CharacteristicValue> {
+        return this.controller.GetVolume(this.zone) as CharacteristicValue;
     }
 
     async getInputState(): Promise<CharacteristicValue> {
