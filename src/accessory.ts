@@ -112,7 +112,7 @@ export class DenonMarantzAVRAccessory {
         this.state.inputs.forEach(async (input, i) => {
             try {
                 this.log.info(`adding television input service with name ${input} `)
-                const inputService = this.accessory.getService(input) || this.accessory.addService(this.platform.Service.InputSource, input);
+                const inputService = this.accessory.getService(input) || this.accessory.addService(this.platform.Service.InputSource, input, i.toString());
 
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
@@ -199,9 +199,7 @@ export class DenonMarantzAVRAccessory {
     }
 
     async updateInputSources() {
-        for (const input in INPUTS) {
-            this.state.inputs.push(input)
-        }
+        INPUTS.forEach((input, i) => {this.state.inputs.push(input)})
     }
 
     async updateAVRState() {
