@@ -69,7 +69,7 @@ export class DenonMarantzController {
         }
 
         await this.serverController.connect(params);
-        this.serverController.on('data', this.serverControllerDataCallback.bind(this));
+        // this.serverController.on('data', this.serverControllerDataCallback.bind(this));
         this.refresh()
     }
 

@@ -96,6 +96,7 @@ export class DenonMarantzAVRAccessory {
         const speakerService = this.accessory.getService(this.platform.Service.TelevisionSpeaker) || this.accessory.addService(this.platform.Service.TelevisionSpeaker);
 
         speakerService
+            .setCharacteristic(this.platform.Characteristic.ConfiguredName, `${this.accessory.context.device.displayName} Speaker`)
             .setCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE)
             .setCharacteristic(
                 this.platform.Characteristic.VolumeControlType,

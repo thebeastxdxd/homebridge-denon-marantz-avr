@@ -120,7 +120,7 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
             this.log.info(`adding accessory ${device.displayName}, with ip ${device.ip}`)
 
             const accessory = new this.api.platformAccessory(
-                `${device.displayName} ${zone}`,
+                device.zone2enabled ? `${device.displayName} ${zone}` : device.displayName,
                 uuid,
                 this.api.hap.Categories.AUDIO_RECEIVER,
             );
