@@ -158,13 +158,14 @@ export class DenonMarantzController {
         let results = data.split('\r');
         this.log.info("split results", results)
         results.forEach((result) => {
-            Object.keys(this.COMMANDS).forEach((cmd) =>{
-                this.log.info("result", result)
-                if (result.startsWith(cmd) && this.COMMANDS[cmd][1] != null) {
-                    this.COMMANDS[cmd][1](result)
-                } else if (result.length !== 0) {
-                    this.log.info("split by cmd ", result, cmd, result.split(cmd))
-                    this.parseMany(cmd, result.split(cmd)[1].trim())
+            Object.keys(this.COMMANDS).forEach((cmd) => {
+                if (result.startsWith(cmd)) {
+                    if (this.COMMANDS[cmd][1] != null) {
+                        this.COMMANDS[cmd][1](result)
+                    } else if (result.length !== 0) {
+                        this.log.info("split by cmd ", result, cmd, result.split(cmd))
+                        this.parseMany(cmd, result.split(cmd)[1].trim())
+                    }
                 }
             })
         })
@@ -240,14 +241,14 @@ export class DenonMarantzController {
     }
 
     async SetVolume(zone: string, value: Number) {
-        
+
         // for some reason this does not work on anything but main zone, 
         // also must give maxVol for it to work
         if (value > this.maxVol) {
             value = this.maxVol;
         }
         if ((Number(value) * 10) % 10) {
-            value = 5* Math.round(Number(value) * 10 / 5)
+            value = 5 * Math.round(Number(value) * 10 / 5)
         }
         let commandPrefix = `${this.getPrefixByZone(zone)}MV${value}\r${this.getPrefixByZone(zone)}MVMAX ${this.maxVol}`;
         await this.serverControllerSend(commandPrefix)
