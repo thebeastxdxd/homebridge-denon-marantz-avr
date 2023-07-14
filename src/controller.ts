@@ -75,10 +75,10 @@ export class DenonMarantzController {
 
     async refresh() {
         this.log.info("starting refresh")
-        for (const cmd in this.COMMANDS) {
+        this.COMMANDS.forEach((cmd: string) => {
             // for status add question mark
             this.serverControllerSend(`${cmd}?`)
-        }
+        })
 
         this.log.info("current state of controller ", this.state)
 
