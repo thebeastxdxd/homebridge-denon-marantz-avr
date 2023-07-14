@@ -115,7 +115,7 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
 
         if (existingAccessory) {
             this.log(`restoring from cache ${device.displayName}, with ip ${device.ip}`)
-            new DenonMarantzAVRAccessory(this, existingAccessory, zone as unknown as Zone, controller);
+            new DenonMarantzAVRAccessory(this.log, this, existingAccessory, zone as unknown as Zone, controller);
         } else {
 
             this.log(`adding accessory ${device.displayName}, with ip ${device.ip}`)
@@ -128,7 +128,7 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
 
             accessory.context = { device };
 
-            new DenonMarantzAVRAccessory(this, accessory, zone as unknown as Zone, controller);
+            new DenonMarantzAVRAccessory(this.log, this, accessory, zone as unknown as Zone, controller);
 
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
             return accessory;

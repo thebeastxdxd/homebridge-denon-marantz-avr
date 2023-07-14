@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue, Logging } from 'homebridge';
 
 import { DenonMarantzAVRPlatform } from './platform';
 import { DenonMarantzController } from './controller';
@@ -18,6 +18,7 @@ export class DenonMarantzAVRAccessory {
     private service: Service;
     private inputServices: Service[] = [];
     private readonly zone: Zone;
+    private log: Logging;
 
     private state: {
         isPlaying: boolean; // TODO: Investigaste a better way of tracking "playing" state
@@ -30,18 +31,21 @@ export class DenonMarantzAVRAccessory {
         };
 
     constructor(
+        log: Logging,
         private readonly platform: DenonMarantzAVRPlatform,
         private readonly accessory: PlatformAccessory,
         zone: Zone,
         private controller: DenonMarantzController,
     ) {
 
+        this.log = log;
         // set the AVR accessory information
         this.accessory
             .getService(this.platform.Service.AccessoryInformation)!
             .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Denon/Marantz')
 
-        this.service = this.accessory.addService(this.platform.Service.Television);
+        this.log.info("adding television service")
+        this.service = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
         this.zone = zone;
         this.init();
 
@@ -88,7 +92,9 @@ export class DenonMarantzAVRAccessory {
     }
 
     async createTVSpeakerService() {
-        const speakerService = this.accessory.addService(this.platform.Service.TelevisionSpeaker);
+
+        this.log.info("adding television speaker service")
+        const speakerService = this.accessory.getService(this.platform.Service.TelevisionSpeaker) || this.accessory.addService(this.platform.Service.TelevisionSpeaker);
 
         speakerService
             .setCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE)
@@ -107,7 +113,8 @@ export class DenonMarantzAVRAccessory {
     async createInputSourceServices() {
         this.state.inputs.forEach(async (input, i) => {
             try {
-                const inputService = this.accessory.addService(this.platform.Service.InputSource, input.text, input.id);
+                this.log.info(`adding television speaker service with name ${input.text} id ${input.id} `)
+                const inputService = this.accessory.getService(input.text) || this.accessory.addService(this.platform.Service.InputSource, input.text, input.id);
 
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
