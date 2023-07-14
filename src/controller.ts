@@ -10,7 +10,7 @@ const serverControllerPort = 23
 export class DenonMarantzController {
     private serverController: telnet_client;
     private readonly log: Logging;
-    private readonly ipaddress: string;
+    public readonly ipaddress: string;
     private quedCommands: [string, ((value: string) => void)][];
     private maxVol: Number;
     private state: { [key: string]: any };
@@ -77,7 +77,8 @@ export class DenonMarantzController {
 
     async refresh() {
         for (const cmd in this.COMMANDS) {
-            await this.serverControllerQueueCommand(cmd)
+            // for status add question mark
+            await this.serverControllerQueueCommand(`${cmd}?`)
         }
 
     }
@@ -88,7 +89,7 @@ export class DenonMarantzController {
 
     async serverControllerQueueCommand(data: string): Promise<string> {
         return new Promise((resolve) => {
-            this.quedCommands.push(['${data}?', resolve]);
+            this.quedCommands.push([data, resolve]);
         });
     }
 

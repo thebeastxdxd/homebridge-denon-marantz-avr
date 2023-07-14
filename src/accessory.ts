@@ -48,7 +48,7 @@ export class DenonMarantzAVRAccessory {
         this.init();
 
         // regularly ping the AVR to keep power/input state syncronised
-        setInterval(this.updateAVRState.bind(this), 300000);
+        setInterval(this.updateAVRState.bind(this), 60000);
     }
 
     async init() {
@@ -235,6 +235,7 @@ export class DenonMarantzAVRAccessory {
     }
 
     async getPowerState(): Promise<CharacteristicValue> {
+        this.log.info(`Get controller state ${this.controller.ipaddress} zone ${this.zone} `)
         return this.controller.GetPowerState(this.zone) as CharacteristicValue;
     }
 
