@@ -2,7 +2,9 @@ import telnet_client from 'telnet-client';
 import { INPUTS } from './types';
 import { Logging, CharacteristicValue } from 'homebridge';
 
-
+function msleep(n: number) {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
+  }
 
 const serverControllerPort = 23
 
@@ -87,6 +89,7 @@ export class DenonMarantzController {
     }
 
     async serverControllerSend(data: string) {
+        msleep(50);
         this.serverController.send(data);
     }
 
