@@ -77,6 +77,7 @@ export class DenonMarantzController {
         this.log.info("starting refresh")
         Object.keys(this.COMMANDS).forEach((cmd: string) => {
             // for status add question mark
+            this.log.info(cmd)
             this.serverControllerSend(`${cmd}?`)
         })
 
@@ -90,7 +91,7 @@ export class DenonMarantzController {
 
     async serverControllerSend(data: string) {
         msleep(50);
-        this.serverController.send(data);
+        this.serverController.send(`${data}\r`);
     }
 
 
