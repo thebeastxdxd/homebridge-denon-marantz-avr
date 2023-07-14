@@ -33,7 +33,7 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
     public readonly Service: typeof Service = this.api.hap.Service;
     public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
     public readonly platformAccessories: PlatformAccessory[] = [];
-    public readonly externalAccessories: PlatformAccessory[] = [];
+    // public readonly externalAccessories: PlatformAccessory[] = [];
 
     constructor(public readonly log: Logging, public readonly config: PlatformConfig, public readonly api: API) {
         this.log.debug('Finished initializing platform:', this.config.name);
@@ -91,46 +91,48 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
         for (const device of (<DenonMarantzConfig>this.config).accessories) {
             await this.createZoneAccessories(device);
 
-
-            if (this.externalAccessories.length > 0) {
-                this.api.publishExternalAccessories(PLUGIN_NAME, this.externalAccessories);
-            }
-
         }
 
     }
 
     async createZoneAccessories(device: DenonMarantzAccessoryConfig) {
 
-        let controller = new  DenonMarantzController(this.log, device.ip);
-        const avrAccessory = await this.createAVRAccessory(device, controller, 'main');
-        this.externalAccessories.push(avrAccessory);
+        let controller = new DenonMarantzController(this.log, device.ip);
+        await this.createAVRAccessory(device, controller, 'main');
 
         //   await this.createVolumeAccessory(device, 'main');
 
         if (device.zone2enabled) {
-            const avrAccessory = await this.createAVRAccessory(device, controller, 'zone2');
-            this.externalAccessories.push(avrAccessory);
-
+            await this.createAVRAccessory(device, controller, 'zone2');
             // await this.createVolumeAccessory(device, 'zone2');
         }
     }
 
-    async createAVRAccessory(device: DenonMarantzAccessoryConfig, controller: DenonMarantzController, zone: Zone['id']): Promise<PlatformAccessory> {
+    async createAVRAccessory(device: DenonMarantzAccessoryConfig, controller: DenonMarantzController, zone: Zone['id']) {
         let uuid = `${device.ip}_${zone}`;
         uuid = this.api.hap.uuid.generate(uuid);
+        const existingAccessory = this.platformAccessories.find(accessory => accessory.UUID === uuid)
 
-        const accessory = new this.api.platformAccessory(
-            `${device.displayName} ${zone}`,
-            uuid,
-            this.api.hap.Categories.AUDIO_RECEIVER,
-        );
+        if (existingAccessory) {
+            this.log(`restoring from cache ${device.displayName}, with ip ${device.ip}`)
+            new DenonMarantzAVRAccessory(this, existingAccessory, zone as unknown as Zone, controller);
+        } else {
 
-        accessory.context = { device };
+            this.log(`adding accessory ${device.displayName}, with ip ${device.ip}`)
 
-        new DenonMarantzAVRAccessory(this, accessory, zone as unknown as Zone, controller);
+            const accessory = new this.api.platformAccessory(
+                `${device.displayName} ${zone}`,
+                uuid,
+                this.api.hap.Categories.AUDIO_RECEIVER,
+            );
 
-        return accessory;
+            accessory.context = { device };
+
+            new DenonMarantzAVRAccessory(this, accessory, zone as unknown as Zone, controller);
+
+            this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+            return accessory;
+        }
     }
 
     // async createVolumeAccessory(device: AccessoryContext['device'], zone: Zone['id']): Promise<void> {
