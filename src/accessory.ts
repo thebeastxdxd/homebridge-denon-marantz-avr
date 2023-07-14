@@ -96,17 +96,16 @@ export class DenonMarantzAVRAccessory {
         const speakerService = this.accessory.getService(this.platform.Service.TelevisionSpeaker) || this.accessory.addService(this.platform.Service.TelevisionSpeaker);
 
         speakerService
-            .setCharacteristic(this.platform.Characteristic.ConfiguredName, `${this.accessory.context.device.displayName} Speaker`)
+            .setCharacteristic(this.platform.Characteristic.Name, `${this.accessory.context.device.displayName} Speaker`)
             .setCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE)
             .setCharacteristic(
                 this.platform.Characteristic.VolumeControlType,
                 this.platform.Characteristic.VolumeControlType.ABSOLUTE,
-            );
+        );
         speakerService.getCharacteristic(this.platform.Characteristic.Mute).onGet(this.getMute.bind(this)).onSet(this.setMute.bind(this))
 
-        speakerService.getCharacteristic(this.platform.Characteristic.Volume).onGet(this.getVolume.bind(this)).onSet(this.setVolume.bind(this))
-
         // handle volume control
+        speakerService.getCharacteristic(this.platform.Characteristic.Volume).onGet(this.getVolume.bind(this)).onSet(this.setVolume.bind(this))
         speakerService.getCharacteristic(this.platform.Characteristic.VolumeSelector).onSet(this.setVolumeSelector.bind(this));
 
         return;
