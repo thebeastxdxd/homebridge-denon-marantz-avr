@@ -1,5 +1,5 @@
 import telnet_client from 'telnet-client';
-import { Zone, Input, INPUTS } from './types';
+import { INPUTS } from './types';
 import { Logging, CharacteristicValue } from 'homebridge';
 
 
@@ -185,8 +185,8 @@ export class DenonMarantzController {
     }
 
 
-    private getPrefixByZone(zone: Zone): string {
-        switch (zone.id) {
+    private getPrefixByZone(zone: string): string {
+        switch (zone) {
             case 'main':
                 return '' //'ZM'
             case 'zone2':
@@ -219,41 +219,41 @@ export class DenonMarantzController {
     }
 
 
-    GetPowerState(zone: Zone): Boolean {
+    GetPowerState(zone: string): Boolean {
         let prefix = this.getPrefixByZone(zone);
-        if (zone.id == 'main') {
+        if (zone === 'main') {
             prefix = 'PW'
         }
 
         return this.parseBoolString(this.state[prefix]);
     }
 
-    async SetPowerState(zone: Zone, value: boolean) {
+    async SetPowerState(zone: string, value: boolean) {
         let prefix = this.getPrefixByZone(zone);
         let state = value ? 'ON' : 'OFF'
-        if (zone.id == 'main') {
+        if (zone === 'main') {
             prefix = 'PW';
             state = value ? 'ON' : 'STANDBY'
         }
         await this.serverControllerQueueCommand(`${prefix}${state}`)
     }
 
-    GetMuteState(zone: Zone): Boolean {
+    GetMuteState(zone: string): Boolean {
         let commandPrefix = `${this.getPrefixByZone(zone)}MU`;
         return this.parseBoolString(this.state[commandPrefix])
     }
 
-    async SetMuteSate(zone: Zone, value: boolean) {
+    async SetMuteSate(zone: string, value: boolean) {
         let commandPrefix = `${this.getPrefixByZone(zone)}MU`
         await this.serverControllerQueueCommand(`${commandPrefix}${this.boolToString(value)}`);
     }
 
-    GetVolume(zone: Zone): Number {
+    GetVolume(zone: string): Number {
         let commandPrefix = `${this.getPrefixByZone(zone)}MV`;
         return this.state[commandPrefix];
     }
 
-    async SetVolume(zone: Zone, value: Number) {
+    async SetVolume(zone: string, value: Number) {
         
         // for some reason this does not work on anything but main zone, 
         // also must give maxVol for it to work
@@ -267,12 +267,12 @@ export class DenonMarantzController {
         await this.serverControllerQueueCommand(commandPrefix)
     }
 
-    GetSource(zone: Zone): string {
+    GetSource(zone: string): string {
         let commandPrefix = `${this.getPrefixByZone(zone)}SI`;
         return this.state[commandPrefix];
     }
 
-    async SetSource(zone: Zone, source: Input) {
+    async SetSource(zone: string, source: string) {
         let command = `${this.getPrefixByZone(zone)}${source}`;
         await this.serverControllerQueueCommand(command)
     }

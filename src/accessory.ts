@@ -4,8 +4,6 @@ import { DenonMarantzAVRPlatform } from './platform';
 import { DenonMarantzController } from './controller';
 import {
     INPUTS,
-    Input,
-    Zone,
 } from './types.js';
 
 interface CachedServiceData {
@@ -17,12 +15,12 @@ interface CachedServiceData {
 export class DenonMarantzAVRAccessory {
     private service: Service;
     private inputServices: Service[] = [];
-    private readonly zone: Zone;
+    private readonly zone: string;
     private log: Logging;
 
     private state: {
         isPlaying: boolean; // TODO: Investigaste a better way of tracking "playing" state
-        inputs: Input[];
+        inputs: string[];
         connectionError: boolean;
     } = {
             isPlaying: true,
@@ -34,7 +32,7 @@ export class DenonMarantzAVRAccessory {
         log: Logging,
         private readonly platform: DenonMarantzAVRPlatform,
         private readonly accessory: PlatformAccessory,
-        zone: Zone,
+        zone: string,
         private controller: DenonMarantzController,
     ) {
 
@@ -113,13 +111,13 @@ export class DenonMarantzAVRAccessory {
     async createInputSourceServices() {
         this.state.inputs.forEach(async (input, i) => {
             try {
-                this.log.info(`adding television speaker service with name ${input.text} id ${input.id} `)
-                const inputService = this.accessory.getService(input.text) || this.accessory.addService(this.platform.Service.InputSource, input.text, input.id);
+                this.log.info(`adding television input service with name ${input} `)
+                const inputService = this.accessory.getService(input) || this.accessory.addService(this.platform.Service.InputSource, input);
 
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
-                    .setCharacteristic(this.platform.Characteristic.Name, input.text)
-                    .setCharacteristic(this.platform.Characteristic.ConfiguredName, input.text)
+                    .setCharacteristic(this.platform.Characteristic.Name, input)
+                    .setCharacteristic(this.platform.Characteristic.ConfiguredName, input)
                     .setCharacteristic(
                         this.platform.Characteristic.IsConfigured,
                         this.platform.Characteristic.IsConfigured.CONFIGURED,
@@ -141,7 +139,7 @@ export class DenonMarantzAVRAccessory {
                 inputService
                     .getCharacteristic(this.platform.Characteristic.ConfiguredName)
                     .onGet(async (): Promise<CharacteristicValue> => {
-                        return input.text;
+                        return input;
                     })
                     .onSet((name: CharacteristicValue) => {
                         const currentConfiguredName = inputService.getCharacteristic(
@@ -152,9 +150,9 @@ export class DenonMarantzAVRAccessory {
                             return;
                         }
 
-                        this.platform.log.debug(`Set input (${input.id}) name to ${name} `);
+                        this.platform.log.debug(`Set input (${input}) name to ${name} `);
 
-                        const configuredName = name || input.text;
+                        const configuredName = name || input;
 
                         inputService.updateCharacteristic(this.platform.Characteristic.ConfiguredName, configuredName);
                     });
@@ -176,7 +174,7 @@ export class DenonMarantzAVRAccessory {
 
                         const isHidden = targetVisibilityState === this.platform.Characteristic.TargetVisibilityState.HIDDEN;
 
-                        this.platform.log.debug(`Set input (${input.id}) visibility state to ${isHidden ? 'HIDDEN' : 'SHOWN'} `);
+                        this.platform.log.debug(`Set input (${input}) visibility state to ${isHidden ? 'HIDDEN' : 'SHOWN'} `);
 
                         inputService.updateCharacteristic(
                             this.platform.Characteristic.CurrentVisibilityState,
@@ -184,7 +182,7 @@ export class DenonMarantzAVRAccessory {
                         );
                     });
 
-                inputService.getCharacteristic(this.platform.Characteristic.Name).onGet((): CharacteristicValue => input.text);
+                inputService.getCharacteristic(this.platform.Characteristic.Name).onGet((): CharacteristicValue => input);
 
 
                 this.service.addLinkedService(inputService);
@@ -193,7 +191,7 @@ export class DenonMarantzAVRAccessory {
 
             } catch (err) {
                 this.platform.log.error(`
-          Failed to add input service ${input.id}:
+          Failed to add input service ${input}:
           ${err}
         `);
             }
@@ -202,7 +200,7 @@ export class DenonMarantzAVRAccessory {
 
     async updateInputSources() {
         for (const input in INPUTS) {
-            this.state.inputs.push(input as unknown as Input)
+            this.state.inputs.push(input)
         }
     }
 
@@ -218,7 +216,7 @@ export class DenonMarantzAVRAccessory {
 
             this.service.updateCharacteristic(
                 this.platform.Characteristic.ActiveIdentifier,
-                this.state.inputs.findIndex((input) => input.id === source),
+                this.state.inputs.findIndex((input) => input === source),
             );
 
             if (this.state.connectionError) {
@@ -376,7 +374,7 @@ export class DenonMarantzAVRAccessory {
 
     async getInputState(): Promise<CharacteristicValue> {
         let source = this.controller.GetSource(this.zone);
-        return this.state.inputs.findIndex((input) => input.id === source);
+        return this.state.inputs.findIndex((input) => input === source);
     }
 
     async setInputState(inputIndex: CharacteristicValue) {
@@ -387,7 +385,7 @@ export class DenonMarantzAVRAccessory {
 
             const setInputResponse = await this.controller.SetSource(this.zone, this.state.inputs[inputIndex]);
 
-            this.platform.log.info(`Set input: ${this.state.inputs[inputIndex].id}`);
+            this.platform.log.info(`Set input: ${this.state.inputs[inputIndex]}`);
         } catch (error) {
             this.platform.log.error((error as Error).message);
         }

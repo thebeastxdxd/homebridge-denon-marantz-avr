@@ -12,7 +12,6 @@ import { DenonMarantzAVRAccessory } from './accessory';
 import { DenonMarantzController } from './controller';
 //   import { YamahaVolumeAccessory } from './volumeAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { Zone } from './types';
 //   import { YamahaPureDirectAccessory } from './pureDirectAccessory.js';
 
 interface DenonMarantzAccessoryConfig {
@@ -108,14 +107,14 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
         }
     }
 
-    async createAVRAccessory(device: DenonMarantzAccessoryConfig, controller: DenonMarantzController, zone: Zone['id']) {
+    async createAVRAccessory(device: DenonMarantzAccessoryConfig, controller: DenonMarantzController, zone: string) {
         let uuid = `${device.ip}_${zone}`;
         uuid = this.api.hap.uuid.generate(uuid);
         const existingAccessory = this.platformAccessories.find(accessory => accessory.UUID === uuid)
 
         if (existingAccessory) {
             this.log(`restoring from cache ${device.displayName}, with ip ${device.ip}`)
-            new DenonMarantzAVRAccessory(this.log, this, existingAccessory, zone as unknown as Zone, controller);
+            new DenonMarantzAVRAccessory(this.log, this, existingAccessory, zone, controller);
         } else {
 
             this.log(`adding accessory ${device.displayName}, with ip ${device.ip}`)
@@ -128,7 +127,7 @@ export class DenonMarantzAVRPlatform implements IndependentPlatformPlugin {
 
             accessory.context = { device };
 
-            new DenonMarantzAVRAccessory(this.log, this, accessory, zone as unknown as Zone, controller);
+            new DenonMarantzAVRAccessory(this.log, this, accessory, zone, controller);
 
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
             return accessory;
