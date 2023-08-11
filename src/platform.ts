@@ -22,6 +22,7 @@ interface DenonMarantzAccessoryConfig {
     maxVolume: Number;
     defaultVolume: Number;
     defaultInput: string;
+    availableInputs?: string[];
 }
 
 interface DenonMarantzConfig extends PlatformConfig {

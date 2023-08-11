@@ -62,12 +62,17 @@ export class DenonMarantzAVRAccessory {
         }
     }
 
+    async updateInputSources() {
+        let inputs: string[] = this.accessory.context.device.availableInputs || INPUTS;
+        inputs.forEach((input) => { this.state.inputs.push(input) })
+    }
+
     async createTVService() {
         // Set Television Service Name & Discovery Mode
         this.log.info("display name is ", this.accessory.context.device.display)
         this.service
             .setCharacteristic(this.platform.Characteristic.Name, this.accessory.context.device.displayName)
-            .setCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessory.context.device.displayName)
+            // .setCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessory.context.device.displayName)
             .setCharacteristic(
                 this.platform.Characteristic.SleepDiscoveryMode,
                 this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE,
@@ -86,7 +91,7 @@ export class DenonMarantzAVRAccessory {
             .onGet(this.getInputState.bind(this));
 
         // Remote Key Set
-        // this.service.getCharacteristic(this.platform.Characteristic.RemoteKey).onSet(this.setRemoteKey.bind(this));
+        this.service.getCharacteristic(this.platform.Characteristic.RemoteKey).onSet(this.setRemoteKey.bind(this));
 
         return;
     }
@@ -102,7 +107,7 @@ export class DenonMarantzAVRAccessory {
             .setCharacteristic(
                 this.platform.Characteristic.VolumeControlType,
                 this.platform.Characteristic.VolumeControlType.ABSOLUTE,
-        );
+            );
         speakerService.getCharacteristic(this.platform.Characteristic.Mute).onGet(this.getMute.bind(this)).onSet(this.setMute.bind(this))
 
         // handle volume control
@@ -112,6 +117,7 @@ export class DenonMarantzAVRAccessory {
         return;
     }
 
+
     async createInputSourceServices() {
         this.state.inputs.forEach(async (input, i) => {
             try {
@@ -120,8 +126,8 @@ export class DenonMarantzAVRAccessory {
 
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
-                    .setCharacteristic(this.platform.Characteristic.Name, input)
-                    // .setCharacteristic(this.platform.Characteristic.ConfiguredName, input)
+                    .setCharacteristic(this.platform.Characteristic.ConfiguredName, input)
+                    .setCharacteristic(this.platform.Characteristic.Name, `${this.accessory.context.device.displayName} input ${input}`)
                     .setCharacteristic(
                         this.platform.Characteristic.IsConfigured,
                         this.platform.Characteristic.IsConfigured.CONFIGURED,
@@ -153,9 +159,16 @@ export class DenonMarantzAVRAccessory {
         });
     }
 
-    async updateInputSources() {
-        INPUTS.forEach((input, i) => {this.state.inputs.push(input)})
+    async setRemoteKey(remoteKey: CharacteristicValue) {
+        try {
+            this.log.info("trying to set key", remoteKey)
+          
+        } catch (error) {
+            this.platform.log.error((error as Error).message);
+        }
     }
+
+
 
     async updateAVRState() {
         try {
@@ -163,7 +176,7 @@ export class DenonMarantzAVRAccessory {
             await this.controller.refresh();
             let power = this.controller.GetPowerState(this.zone);
             let source = this.controller.GetInputSource(this.zone);
-            this.platform.log.debug(`AVR PING`, { power: power, input: source});
+            this.platform.log.debug(`AVR PING`, { power: power, input: source });
 
             this.service.updateCharacteristic(this.platform.Characteristic.Active, power as CharacteristicValue);
 
@@ -196,6 +209,11 @@ export class DenonMarantzAVRAccessory {
 
     async setPowerState(state: CharacteristicValue) {
         await this.controller.SetPowerState(this.zone, state as boolean);
+        if (state as boolean && this.zone === 'main') {
+            this.log.info(`setting default values input:${this.accessory.context.device.defaultInput} volume:${this.accessory.context.device.defaultVolume}`)
+            this.setInputState(this.accessory.context.device.defaultInput)
+            this.setVolume(this.accessory.context.device.defaultVolume)
+        }
     }
 
     async getMute(): Promise<CharacteristicValue> {
@@ -206,7 +224,7 @@ export class DenonMarantzAVRAccessory {
     async setMute(state: CharacteristicValue) {
         await this.controller.SetMuteSate(this.zone, state as boolean);
     }
-    
+
     async setVolumeSelector(direction: CharacteristicValue) {
         try {
             const currentVolume = Number(this.controller.GetVolume(this.zone));
@@ -241,13 +259,9 @@ export class DenonMarantzAVRAccessory {
 
     async setInputState(inputIndex: CharacteristicValue) {
         try {
-            if (typeof inputIndex !== 'number') {
-                return;
-            }
+            const setInputResponse = await this.controller.SetInputSource(this.zone, this.state.inputs[inputIndex as number]);
 
-            const setInputResponse = await this.controller.SetInputSource(this.zone, this.state.inputs[inputIndex]);
-
-            this.platform.log.info(`Set input: ${this.state.inputs[inputIndex]}`);
+            this.platform.log.info(`Set input: ${this.state.inputs[inputIndex as number]}`);
         } catch (error) {
             this.platform.log.error((error as Error).message);
         }

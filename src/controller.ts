@@ -4,7 +4,7 @@ import { Logging, CharacteristicValue } from 'homebridge';
 
 function msleep(n: number) {
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
-  }
+}
 
 const serverControllerPort = 23
 
@@ -14,6 +14,7 @@ export class DenonMarantzController {
     private readonly log: Logging;
     public readonly ipaddress: string;
     private maxVol: Number;
+    private reconnectOnErrRetires: number;
     private state: { [key: string]: any };
     private COMMANDS: { [key: string]: any } = {
         "PW": ["Power", null],
@@ -50,6 +51,7 @@ export class DenonMarantzController {
         this.log.info("Connecting to Denon/Marantz Controller at ", ipaddress);
         this.serverControllerConnect();
         this.state = {}
+        this.reconnectOnErrRetires = 5;
         for (const command of Object.keys(this.COMMANDS)) {
             this.state[command] = '-';
         }
@@ -70,17 +72,29 @@ export class DenonMarantzController {
 
         await this.serverController.connect(params);
         this.serverController.on('data', this.serverControllerDataCallback.bind(this));
+        this.reconnectOnErrRetires = 5;
         this.refresh()
     }
 
     async refresh() {
-        Object.keys(this.COMMANDS).forEach((cmd: string) => {
-            // for status add question mark
-             this.serverControllerSend(`${cmd}?`)
-        })
+        try {
 
-        this.log.info("current state of controller ", this.state)
+            Object.keys(this.COMMANDS).forEach((cmd: string) => {
+                // for status add question mark
+                this.serverControllerSend(`${cmd}?`)
+            })
 
+            this.log.info(`current state ${this.ipaddress} of controller ${this.state}`);
+        } catch (error) {
+            this.log.error(`received error ${error}`)
+            if (this.reconnectOnErrRetires > 0) {
+                // try to connect again.
+                await this.serverControllerConnect();
+                this.reconnectOnErrRetires--;
+            } else {
+                throw error;
+            }
+        }
     }
 
     private serverControllerDataCallback(data: Buffer) {
@@ -109,7 +123,7 @@ export class DenonMarantzController {
             isMax = true;
             value = data.split('MVMAX')[1].trim()
         } else {
-            value = data.split('MV')[1]
+            value = data.split('MV')[1].trim()
         }
 
         let volume = Number(value)
@@ -128,7 +142,7 @@ export class DenonMarantzController {
 
     private parseZone(zone: string, data: string) {
         this.log.info(`parseZone ${zone} with ${data}`)
-        if (data in ['ON', 'OFF']) {
+        if (['ON', 'OFF'].includes(data)) {
             this.state[zone] = data;
             return
         }
@@ -145,7 +159,7 @@ export class DenonMarantzController {
         }
 
         // assume source inputs
-        if (data in INPUTS) {
+        if (INPUTS.includes(data)) {
             this.state[`${zone}SI`] = data;
             return
         }
@@ -153,11 +167,11 @@ export class DenonMarantzController {
     }
 
     private parseZ2(data: string) {
-        this.parseZone('Z2', data.split('Z2')[1])
+        this.parseZone('Z2', data.split('Z2')[1].trim())
     }
 
     private parseZ3(data: string) {
-        this.parseZone('Z3', data.split('Z3')[1])
+        this.parseZone('Z3', data.split('Z3')[1].trim())
     }
 
     private parseCommandResult(data: string) {
@@ -264,7 +278,10 @@ export class DenonMarantzController {
     }
 
     async SetInputSource(zone: string, source: string) {
-        let command = `${this.getPrefixByZone(zone)}${source}`;
-        await this.serverControllerSend(command)
+        if (zone == 'main') {
+            await this.serverControllerSend(`SI${source}`)
+        } else {
+            await this.serverControllerSend(`${this.getPrefixByZone(zone)}${source}`)
+        }
     }
 }
