@@ -1,48 +1,50 @@
 {
-    "name": "homebridge-denon-v3",
-    "version": "1.0.52",
-    "description": "Denon and Marantz AVR support for Homebridge: https://github.com/nfarina/homebridge",
-    "license": "MIT",
-    "keywords": [
-        "homebridge-plugin",
-        "Denon",
-        "Marantz"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/thebeastxdxd/homebridge-denon-marantz-avr.git"
-    },
-    "bugs": {
-        "url": "http://github.com/thebeastxdxd/homebridge-denon-marantz-avr/issues"
-    },
-    "engines": {
-        "node": ">=10.17.0",
-        "homebridge": ">=1.0.0"
-    },
-    "main": "dist/index.js",
-    "files": [
-        "dist"
-    ],
-    "dependencies": {
-        "telnet-client": "^1.4.9"
-    },
-    "devDependencies": {
-        "@types/node": "^10.17.19",
-        "homebridge": "^1.0.4",
-        "rimraf": "^3.0.2",
-        "typescript": "^4.2.4"
-    },
-    "scripts": {
-        "clean": "rimraf ./dist",
-        "build": "rimraf ./dist && tsc",
-        "prepublishOnly": "npm run build",
-        "postpublish": "npm run clean",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "prettier": {
-        "singleQuote": true,
-        "tabWidth": 4,
-        "trailingComma": true,
-        "printWidth": 100
-    }
+  "name": "homebridge-denon-marantz-avr",
+  "version": "1.1.0",
+  "description": "Denon and Marantz AVR support for Homebridge: https://github.com/nfarina/homebridge",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin",
+    "Denon",
+    "Marantz",
+    "avr",
+    "audio-receiver"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thebeastxdxd/homebridge-denon-marantz-avr.git"
+  },
+  "bugs": {
+    "url": "http://github.com/thebeastxdxd/homebridge-denon-marantz-avr/issues"
+  },
+  "engines": {
+    "node": ">=10.17.0",
+    "homebridge": ">=1.0.0"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "telnet-client": "^1.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^10.17.19",
+    "homebridge": "^1.0.4",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.2.4"
+  },
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": true,
+    "printWidth": 100
+  }
 }

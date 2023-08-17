@@ -8,6 +8,7 @@ function msleep(n: number) {
 
 const serverControllerPort = 23
 
+// TODO: replace with REST API (HTTP)
 
 export class DenonMarantzController {
     private serverController: telnet_client;
@@ -266,7 +267,7 @@ export class DenonMarantzController {
             value = this.maxVol;
         }
         if ((Number(value) * 10) % 10) {
-            value = 5 * Math.round(Number(value) * 10 / 5)
+            value = 1 * Math.round(Number(value) * 10 / 1) // TODO: handle volume step in config
         }
         let commandPrefix = `${this.getPrefixByZone(zone)}MV${value}`;
         await this.serverControllerSend(commandPrefix)

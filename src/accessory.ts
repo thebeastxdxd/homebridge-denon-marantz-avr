@@ -41,6 +41,12 @@ export class DenonMarantzAVRAccessory {
         this.accessory
             .getService(this.platform.Service.AccessoryInformation)!
             .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Denon/Marantz')
+            .setCharacteristic(this.platform.Characteristic.Model, 'TBD')
+            .setCharacteristic(this.platform.Characteristic.SerialNumber, 'TBD')
+            .setCharacteristic(
+              this.platform.Characteristic.FirmwareRevision,
+              `${this.accessory.context.device.firmwareVersion}`,
+            );
 
         this.log.info("adding television service")
         this.service = this.accessory.getService(this.platform.Service.Television) || this.accessory.addService(this.platform.Service.Television);
@@ -48,11 +54,11 @@ export class DenonMarantzAVRAccessory {
         this.init();
 
         // regularly ping the AVR to keep power/input state syncronised
-        setInterval(this.updateAVRState.bind(this), 60000);
+        setInterval(this.updateAVRState.bind(this), 10000);
     }
 
     async init() {
-        try {
+      try {
             await this.updateInputSources();
             await this.createTVService();
             await this.createTVSpeakerService();
@@ -72,7 +78,7 @@ export class DenonMarantzAVRAccessory {
         this.log.info("display name is ", this.accessory.context.device.display)
         this.service
             .setCharacteristic(this.platform.Characteristic.Name, this.accessory.context.device.displayName)
-            // .setCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessory.context.device.displayName)
+            .setCharacteristic(this.platform.Characteristic.ConfiguredName, this.accessory.context.device.displayName)
             .setCharacteristic(
                 this.platform.Characteristic.SleepDiscoveryMode,
                 this.platform.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE,
@@ -127,7 +133,7 @@ export class DenonMarantzAVRAccessory {
                 inputService
                     .setCharacteristic(this.platform.Characteristic.Identifier, i)
                     .setCharacteristic(this.platform.Characteristic.ConfiguredName, input)
-                    .setCharacteristic(this.platform.Characteristic.Name, `${this.accessory.context.device.displayName} input ${input}`)
+                    .setCharacteristic(this.platform.Characteristic.Name, `${this.accessory.context.device.displayName} ${input}`)
                     .setCharacteristic(
                         this.platform.Characteristic.IsConfigured,
                         this.platform.Characteristic.IsConfigured.CONFIGURED,
@@ -138,11 +144,11 @@ export class DenonMarantzAVRAccessory {
                     )
                     .setCharacteristic(
                         this.platform.Characteristic.InputSourceType,
-                        this.platform.Characteristic.InputSourceType.APPLICATION,
+                        this.platform.Characteristic.InputSourceType.HOME_SCREEN,
                     )
                     .setCharacteristic(
                         this.platform.Characteristic.InputDeviceType,
-                        this.platform.Characteristic.InputDeviceType.TV,
+                        this.platform.Characteristic.InputDeviceType.OTHER,
                     );
 
 
@@ -228,7 +234,7 @@ export class DenonMarantzAVRAccessory {
     async setVolumeSelector(direction: CharacteristicValue) {
         try {
             const currentVolume = Number(this.controller.GetVolume(this.zone));
-            const volumeStep = 5;
+            const volumeStep = 1; // TODO: handle volume step in config
 
             if (direction === this.platform.Characteristic.VolumeSelector.INCREMENT) {
                 this.platform.log.info('Volume Up', currentVolume + volumeStep);
