@@ -6,6 +6,8 @@ import {
     INPUTS,
 } from './types.js';
 
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+            
 interface CachedServiceData {
     Identifier: number;
     CurrentVisibilityState: number;
@@ -211,6 +213,7 @@ export class DenonMarantzAVRAccessory {
         await this.controller.SetPowerState(this.zone, state as boolean);
         if (state as boolean && this.zone === 'main') {
             this.log.info(`setting default values input:${this.accessory.context.device.defaultInput} volume:${this.accessory.context.device.defaultVolume}`)
+            await sleep(1000) // sleep needed between powwer on otherwise volume set to 0
             this.setInputState(this.accessory.context.device.defaultInput)
             this.setVolume(this.accessory.context.device.defaultVolume)
         }
@@ -227,7 +230,7 @@ export class DenonMarantzAVRAccessory {
 
     async setVolumeSelector(direction: CharacteristicValue) {
         try {
-            const currentVolume = Number(this.controller.GetVolume(this.zone));
+            const currentVolume = this.controller.GetVolume(this.zone);
             const volumeStep = 5;
 
             if (direction === this.platform.Characteristic.VolumeSelector.INCREMENT) {

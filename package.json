@@ -1,6 +1,6 @@
 {
     "name": "homebridge-denon-v3",
-    "version": "1.0.52",
+    "version": "1.0.53",
     "description": "Denon and Marantz AVR support for Homebridge: https://github.com/nfarina/homebridge",
     "license": "MIT",
     "keywords": [

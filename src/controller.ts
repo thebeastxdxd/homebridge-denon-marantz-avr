@@ -13,7 +13,7 @@ export class DenonMarantzController {
     private serverController: telnet_client;
     private readonly log: Logging;
     public readonly ipaddress: string;
-    private maxVol: Number;
+    private maxVol: number;
     private reconnectOnErrRetires: number;
     private state: { [key: string]: any };
     private COMMANDS: { [key: string]: any } = {
@@ -208,7 +208,7 @@ export class DenonMarantzController {
 
     }
 
-    private parseBoolString(b: string): Boolean {
+    private parseBoolString(b: string): boolean {
         if (b == 'ON') {
             return true;
         } else {
@@ -216,7 +216,7 @@ export class DenonMarantzController {
         }
     }
 
-    private boolToString(b: Boolean): string {
+    private boolToString(b: boolean): string {
         if (b) {
             return 'ON';
         } else {
@@ -225,7 +225,7 @@ export class DenonMarantzController {
     }
 
 
-    GetPowerState(zone: string): Boolean {
+    GetPowerState(zone: string): boolean {
         let prefix = this.getPrefixByZone(zone);
         if (zone === 'main') {
             prefix = 'PW'
@@ -244,7 +244,7 @@ export class DenonMarantzController {
         await this.serverControllerSend(`${prefix}${state}`)
     }
 
-    GetMuteState(zone: string): Boolean {
+    GetMuteState(zone: string): boolean {
         let commandPrefix = `${this.getPrefixByZone(zone)}MU`;
         return this.parseBoolString(this.state[commandPrefix])
     }
@@ -254,12 +254,12 @@ export class DenonMarantzController {
         await this.serverControllerSend(`${commandPrefix}${this.boolToString(value)}`);
     }
 
-    GetVolume(zone: string): Number {
+    GetVolume(zone: string): number {
         let commandPrefix = `${this.getPrefixByZone(zone)}MV`;
-        return this.state[commandPrefix];
+        return Number(this.state[commandPrefix]);
     }
 
-    async SetVolume(zone: string, value: Number) {
+    async SetVolume(zone: string, value: number) {
 
         // for some reason this does not work on anything but main zone, 
         if (value > this.maxVol) {
@@ -268,6 +268,8 @@ export class DenonMarantzController {
         if ((Number(value) * 10) % 10) {
             value = 5 * Math.round(Number(value) * 10 / 5)
         }
+        this.log.info(`setting new volume: ${value}`)
+        // TODO: currently doesn't work with values below 10 because it needs to be padded by zero
         let commandPrefix = `${this.getPrefixByZone(zone)}MV${value}`;
         await this.serverControllerSend(commandPrefix)
     }
